@@ -1,0 +1,13 @@
+// $Id$
+// vim:ft=javascript
+
+// If your extension references something external, use ARG_WITH
+// ARG_WITH("beehive", "for beehive support", "no");
+
+// Otherwise, use ARG_ENABLE
+// ARG_ENABLE("beehive", "enable beehive support", "no");
+
+if (PHP_BEEHIVE != "no") {
+	EXTENSION("beehive", "beehive.c");
+}
+
