@@ -137,7 +137,8 @@ PHP_FUNCTION(beehive_packet_unpack)
     //开始解 routers;
     uint64_t router_item = 0;
     int start = BEEHIVE_FIXED_HEADER_LEN;
-    for (int i = 0; i < header->routers; i ++)
+    int i;
+    for (i = 0; i < header->routers; i ++)
     {
         router_item = *(uint64_t*) (arg + start);
         router_item = ntohll(router_item);
