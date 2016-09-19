@@ -105,18 +105,21 @@ PHP_FUNCTION(beehive_packet_unpack)
     int arg_len, len;
     zval *router_items;
 
-    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &arg, &arg_len) == FAILURE) {
+    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &arg, &arg_len) == FAILURE)
+    {
         return;
     }
     array_init(return_value);
-    if (arg_len < 6) {
+    if (arg_len < 6)
+    {
         return php_error_docref(NULL, E_WARNING, "packet lenght is to short!");
     }
 
     Header *header = (Header*) arg;
 
     uint32_t packet_len = ntohl(header->packet_len);
-    if (arg_len < packet_len) {
+    if (arg_len < packet_len)
+    {
         return php_error_docref(NULL, E_WARNING, "packet header lenght is to short!");
     }
     MAKE_STD_ZVAL(router_items);
@@ -134,20 +137,20 @@ PHP_FUNCTION(beehive_packet_unpack)
     //开始解 routers;
     uint64_t router_item = 0;
     int start = BEEHIVE_FIXED_HEADER_LEN;
-    for (int i = 0; i < header->routers; i ++) {
+    for (int i = 0; i < header->routers; i ++)
+    {
         router_item = *(uint64_t*) (arg + start);
         router_item = ntohll(router_item);
         start = start + 8;
-        php_printf("router_item %llu >>", router_item); 
         add_next_index_long(router_items, router_item);
     }
     uint64_t dst = 0;
-    if (header->dst_mode > 0) {
+    if (header->dst_mode > 0)
+    {
         dst = *(uint64_t*) (arg + start);
         dst = ntohll(dst);
         start = start + 8;
     }
-    php_printf("@start %d>> ", start); 
     add_assoc_long(return_value, "dst", dst);
     add_assoc_zval(return_value, "routers_list", router_items);
     add_assoc_stringl(return_value, "body", arg + start, packet_len - ntohs(header->header_len) - 2, 1);
@@ -168,56 +171,65 @@ PHP_FUNCTION(beehive_packet_pack)
 
     Header header;
     memset(&header, 0, sizeof(header));
-    if (php_beehive_array_get_value(vht, "flag", v)) {
+    if (php_beehive_array_get_value(vht, "flag", v))
+    {
         convert_to_long(v);
         header.flag = htons((uint16_t) Z_LVAL_P(v));
     }
 
-    if (php_beehive_array_get_value(vht, "service", v)) {
+    if (php_beehive_array_get_value(vht, "service", v))
+    {
         convert_to_long(v);
         header.service = htonl((uint32_t) Z_LVAL_P(v));
     }
 
-    if (php_beehive_array_get_value(vht, "time", v)) {
+    if (php_beehive_array_get_value(vht, "time", v))
+    {
         convert_to_long(v);
         header.time = htonl((uint32_t) Z_LVAL_P(v));
     }
 
-    if (php_beehive_array_get_value(vht, "uniqid", v)) {
+    if (php_beehive_array_get_value(vht, "uniqid", v))
+    {
         convert_to_long(v);
         header.uniqid = htonl((uint32_t) Z_LVAL_P(v));
     }
 
-    if (php_beehive_array_get_value(vht, "askid", v)) {
+    if (php_beehive_array_get_value(vht, "askid", v))
+    {
         convert_to_long(v);
         header.askid = htonl((uint32_t) Z_LVAL_P(v));
     }
 
-    if (php_beehive_array_get_value(vht, "code", v)) {
+    if (php_beehive_array_get_value(vht, "code", v))
+    {
         convert_to_long(v);
         header.code = htons((uint16_t) Z_LVAL_P(v));
     }
 
-    if (php_beehive_array_get_value(vht, "dst_mode", v)) {
+    if (php_beehive_array_get_value(vht, "dst_mode", v))
+    {
         convert_to_long(v);
         header.dst_mode = (uint8_t) Z_LVAL_P(v);
-        php_printf("The array passed contains %d elements ", header.dst_mode); 
     }
 
     //获取数由表
     HashTable *router_table = NULL;
-    if (php_beehive_array_get_value(vht, "routers_list", v)) {
+    if (php_beehive_array_get_value(vht, "routers_list", v))
+    {
         router_table = Z_ARRVAL_P(v);
         header.routers = zend_hash_num_elements(router_table);
     }
     //计算包长
     int header_len = BEEHIVE_FIXED_HEADER_LEN - 6 + header.routers * 8;
-    if (header.dst_mode > 0) {
+    if (header.dst_mode > 0)
+    {
         header_len = header_len + 8;
     }
 
     uint32_t body_len = 0;
-    if (php_beehive_array_get_value(vht, "body", v)) {
+    if (php_beehive_array_get_value(vht, "body", v))
+    {
         convert_to_string(v);
         body_len = strlen(Z_STRVAL_P(v));
     }
@@ -226,35 +238,36 @@ PHP_FUNCTION(beehive_packet_pack)
     uint32_t packet_len_total = header_len + body_len + 6;
     header.packet_len = htonl(packet_len_total - 4);
 
-    php_printf("Header %d header_len \n", header_len);
-    php_printf("Header %d packet_len \n", packet_len_total);
-
     char *ret = (char*)emalloc(header_len + body_len + 6);
     memcpy(ret, &header, sizeof(header));
     int start = BEEHIVE_FIXED_HEADER_LEN;
-    if (header.routers > 0) {
+    if (header.routers > 0)
+    {
         HashPosition pointer;
         uint64_t router_item = 0;
-        php_printf("The array passed contains %d elements ", header.routers);  
         for(zend_hash_internal_pointer_reset_ex(router_table, &pointer);
             zend_hash_get_current_data_ex(router_table, (void**) &data, &pointer) == SUCCESS;
-            zend_hash_move_forward_ex(router_table, &pointer)) {
+            zend_hash_move_forward_ex(router_table, &pointer))
+        {
             convert_to_long_ex(data);
             router_item = htonll(Z_LVAL_PP(data));
             memcpy(ret + start, &router_item, 8);
             start = start + 8;
         }
     }
-    if (header.dst_mode > 0) {
+    if (header.dst_mode > 0)
+    {
         uint64_t dst = 0;
-        if (php_beehive_array_get_value(vht, "dst", v)) {
+        if (php_beehive_array_get_value(vht, "dst", v))
+        {
             convert_to_long(v);
             dst = htonll(Z_LVAL_P(v));
         }
         memcpy(ret + start, &dst, 8);
         start = start + 8;
     }
-    if (php_beehive_array_get_value(vht, "body", v)) {
+    if (php_beehive_array_get_value(vht, "body", v))
+    {
         //convert_to_string(v);
         memcpy(ret + start, Z_STRVAL_P(v), body_len);
     }
