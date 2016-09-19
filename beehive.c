@@ -120,7 +120,7 @@ PHP_FUNCTION(beehive_packet_unpack)
     uint32_t packet_len = ntohl(header->packet_len);
     if (arg_len < packet_len)
     {
-        return php_error_docref(NULL, E_WARNING, "packet header lenght is to short!");
+        return php_error_docref(NULL, E_WARNING, "packet header lenght is to short! %d -> %d-> %d", arg_len, packet_len, header->packet_len);
     }
     MAKE_STD_ZVAL(router_items);
     array_init(router_items);
