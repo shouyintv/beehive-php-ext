@@ -7,9 +7,9 @@ dnl without editing.
 
 dnl If your extension references something external, use with:
 
-dnl PHP_ARG_WITH(beehive, for beehive support,
-dnl Make sure that the comment is aligned:
-dnl [  --with-beehive             Include beehive support])
+PHP_ARG_WITH(beehive, for beehive support,
+Make sure that the comment is aligned:
+[  --with-beehive             Include beehive support])
 
 dnl Otherwise use enable:
 
