@@ -130,7 +130,7 @@ PHP_FUNCTION(beehive_packet_unpack)
     add_assoc_long(return_value, "service", ntohl(header->service));
     add_assoc_long(return_value, "time", ntohl(header->time));
     add_assoc_long(return_value, "uniqid", ntohl(header->uniqid));
-    add_assoc_long(return_value, "askid", ntohs(header->askid));
+    add_assoc_long(return_value, "askid", ntohl(header->askid));
     add_assoc_long(return_value, "code", ntohs(header->code));
     add_assoc_long(return_value, "routers", header->routers);
     add_assoc_long(return_value, "dst_mode", header->dst_mode);
