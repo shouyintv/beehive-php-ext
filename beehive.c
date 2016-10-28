@@ -141,7 +141,8 @@ PHP_FUNCTION(beehive_packet_unpack)
 
     Header *header = (Header*) arg;
 
-    uint32_t packet_len = ntohl(header->packet_len);
+    uint32_t packet_len = (uint32_t) ntohl(header->packet_len);
+    uint16_t header_len = (uint16_t) ntohs(header->header_len);
     if (arg_len < packet_len)
     {
         return php_error_docref(NULL, E_WARNING, "packet header lenght is to short! %d -> %d-> %d", arg_len, packet_len, header->packet_len);
@@ -149,13 +150,13 @@ PHP_FUNCTION(beehive_packet_unpack)
     MAKE_STD_ZVAL(router_items);
     array_init(router_items);
     add_assoc_long(return_value, "packet_len", packet_len);
-    add_assoc_long(return_value, "header_len", ntohs(header->header_len));
-    add_assoc_long(return_value, "flag", ntohs(header->flag));
-    add_assoc_long(return_value, "service", ntohl(header->service));
-    add_assoc_long(return_value, "time", ntohl(header->time));
-    add_assoc_long(return_value, "uniqid", ntohl(header->uniqid));
-    add_assoc_long(return_value, "askid", ntohl(header->askid));
-    add_assoc_long(return_value, "code", ntohs(header->code));
+    add_assoc_long(return_value, "header_len", header_len);
+    add_assoc_long(return_value, "flag", (uint16_t) ntohs(header->flag));
+    add_assoc_long(return_value, "service", (uint32_t) ntohl(header->service));
+    add_assoc_long(return_value, "time", (uint32_t) ntohl(header->time));
+    add_assoc_long(return_value, "uniqid", (uint32_t) ntohl(header->uniqid));
+    add_assoc_long(return_value, "askid", (uint32_t) ntohl(header->askid));
+    add_assoc_long(return_value, "code", (uint16_t) ntohs(header->code));
     add_assoc_long(return_value, "routers", header->routers);
     add_assoc_long(return_value, "dst_mode", header->dst_mode);
     //开始解 routers;
@@ -165,7 +166,7 @@ PHP_FUNCTION(beehive_packet_unpack)
     for (i = 0; i < header->routers; i ++)
     {
         router_item = *(uint64_t*) (arg + start);
-        router_item = ntohll(router_item);
+        router_item = (uint64_t) ntohll(router_item);
         start = start + 8;
         add_next_index_long(router_items, router_item);
     }
@@ -173,12 +174,12 @@ PHP_FUNCTION(beehive_packet_unpack)
     if (header->dst_mode > 0)
     {
         dst = *(uint64_t*) (arg + start);
-        dst = ntohll(dst);
+        dst = (uint64_t) ntohll(dst);
         start = start + 8;
     }
     add_assoc_long(return_value, "dst", dst);
     add_assoc_zval(return_value, "routers_list", router_items);
-    add_assoc_stringl(return_value, "body", arg + start, packet_len - ntohs(header->header_len) - 2, 1);
+    add_assoc_stringl(return_value, "body", arg + start, packet_len - header_len - 2, 1);
 }
 
 PHP_FUNCTION(beehive_packet_pack)
