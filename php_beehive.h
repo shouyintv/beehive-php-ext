@@ -24,7 +24,7 @@
 extern zend_module_entry beehive_module_entry;
 #define phpext_beehive_ptr &beehive_module_entry
 
-#define PHP_BEEHIVE_VERSION "1.0.1" /* Replace with version number for your extension */
+#define PHP_BEEHIVE_VERSION "1.0.2" /* Replace with version number for your extension */
 
 #ifdef PHP_WIN32
 #	define PHP_BEEHIVE_API __declspec(dllexport)

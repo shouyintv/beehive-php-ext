@@ -298,7 +298,7 @@ PHP_FUNCTION(beehive_packet_pack)
         memcpy(ret + start, Z_STRVAL_P(v), body_len);
     }
 
-    RETURN_STRINGL(ret, packet_len_total, 0);
+    RETURN_STRINGL(ret, packet_len_total, 1);
 }
 
 // array_init(return_value);
