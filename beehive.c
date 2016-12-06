@@ -264,7 +264,7 @@ PHP_FUNCTION(beehive_packet_pack)
     uint32_t packet_len_total = header_len + body_len + 6;
     header.packet_len = htonl(packet_len_total - 4);
 
-    char *ret = (char*)emalloc(header_len + body_len + 6);
+    char *ret = (char*)emalloc(header_len + body_len + 6 + 1);
     memcpy(ret, &header, sizeof(header));
     int start = BEEHIVE_FIXED_HEADER_LEN;
     if (header.routers > 0)
@@ -297,8 +297,8 @@ PHP_FUNCTION(beehive_packet_pack)
         //convert_to_string(v);
         memcpy(ret + start, Z_STRVAL_P(v), body_len);
     }
-
-    RETURN_STRINGL(ret, packet_len_total, 1);
+    ret[header_len + body_len + 6] = 0;
+    RETURN_STRINGL(ret, packet_len_total, 0);
 }
 
 // array_init(return_value);
