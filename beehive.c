@@ -179,7 +179,11 @@ PHP_FUNCTION(beehive_packet_unpack)
     }
     add_assoc_long(return_value, "dst", dst);
     add_assoc_zval(return_value, "routers_list", router_items);
+    #if PHP_MAJOR_VERSION < 7
     add_assoc_stringl(return_value, "body", arg + start, packet_len - header_len - 2, 1);
+    #else
+    add_assoc_stringl(return_value, "body", arg + start, packet_len - header_len - 2);
+    #endif
 }
 
 PHP_FUNCTION(beehive_packet_pack)
@@ -272,7 +276,11 @@ PHP_FUNCTION(beehive_packet_pack)
         HashPosition pointer;
         uint64_t router_item = 0;
         for(zend_hash_internal_pointer_reset_ex(router_table, &pointer);
+#if PHP_MAJOR_VERSION < 7
             zend_hash_get_current_data_ex(router_table, (void**) &data, &pointer) == SUCCESS;
+#else
+            zend_hash_get_current_data_ex(router_table, (void**) &data) == SUCCESS;
+#endif
             zend_hash_move_forward_ex(router_table, &pointer))
         {
             convert_to_long_ex(data);
@@ -298,7 +306,11 @@ PHP_FUNCTION(beehive_packet_pack)
         memcpy(ret + start, Z_STRVAL_P(v), body_len);
     }
     ret[header_len + body_len + 6] = 0;
+    #if PHP_MAJOR_VERSION < 7
     RETURN_STRINGL(ret, packet_len_total, 0);
+    #else
+    RETURN_STRINGL(ret, packet_len_total);
+    #endif
 }
 
 // array_init(return_value);
@@ -319,9 +331,9 @@ PHP_FUNCTION(beehive_packet_pack)
 // 	RETURN_STRINGL(strg, len, 0);
 // }
 /* }}} */
-/* The previous line is meant for vim and emacs, so it can correctly fold and 
-   unfold functions in source code. See the corresponding marks just before 
-   function definition, where the functions purpose is also documented. Please 
+/* The previous line is meant for vim and emacs, so it can correctly fold and
+   unfold functions in source code. See the corresponding marks just before
+   function definition, where the functions purpose is also documented. Please
    follow this convention for the convenience of others editing your code.
 */
 
@@ -341,7 +353,7 @@ static void php_beehive_init_globals(zend_beehive_globals *beehive_globals)
  */
 PHP_MINIT_FUNCTION(beehive)
 {
-	/* If you have INI entries, uncomment these lines 
+	/* If you have INI entries, uncomment these lines
 	REGISTER_INI_ENTRIES();
 	*/
 	return SUCCESS;
